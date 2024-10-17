@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Lens Solver</string>
+    <string name="action_go">Go</string>
+    <string name="baking_title">Baking with Gemini</string>
+    <string name="label_prompt">Prompt</string>
+    <string name="prompt_placeholder">Solve the problem provided, explain step by step, Use bahasa Indonesia, Please respond to this chat conversation like a friendly teacher.</string>
+    <string name="image4_description">Soal</string>
+    <string name="results_placeholder">(Results will appear here)</string>
+</resources>
