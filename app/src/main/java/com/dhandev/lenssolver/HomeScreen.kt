@@ -1,8 +1,10 @@
 package com.dhandev.lenssolver
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,9 +65,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.dhandev.lenssolver.ui.theme.LensSolverTheme
 import com.dhandev.lenssolver.ui.theme.Pink40
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -78,20 +84,33 @@ fun HomeScreen(
     var pickedImage by remember { mutableStateOf<Uri?>(null) }
     val prompt by rememberSaveable { mutableStateOf(placeholderPrompt) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
-    var showDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
     val uiState by homeViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
 
     val imagePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) {
         it?.let { pickedImage = it }
     }
-    LaunchedEffect(takenPhotoUri) {
-        if (takenPhotoUri != null)
-        pickedImage = takenPhotoUri
+    LaunchedEffect(takenPhotoUri) { if (takenPhotoUri != null) pickedImage = takenPhotoUri }
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Toast.makeText(
+                context,
+                "Camera Permission Granted",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            Toast.makeText(
+                context,
+                "Camera Permission should be Granted to Take Image",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
     val scope = rememberCoroutineScope()
     var isExpanded by remember { mutableStateOf(false) }
@@ -265,7 +284,11 @@ fun HomeScreen(
             LensDialog(
                 onDismiss = { showDialog = false },
                 onCamera = {
-                    /**nothing*/
+                    if (!cameraPermissionState.status.isGranted && cameraPermissionState.status.shouldShowRationale) {
+                        // Show rationale if needed
+                    } else {
+                        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
                 },
                 onPicker = {
                     imagePicker.launch(
