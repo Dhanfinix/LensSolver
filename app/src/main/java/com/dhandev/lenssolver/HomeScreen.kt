@@ -5,10 +5,13 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,7 +71,6 @@ import com.dhandev.lenssolver.ui.theme.Pink40
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -79,10 +81,9 @@ fun HomeScreen(
     takenPhotoUri: Uri? = null,
     doTakePicture: ()->Unit
 ) {
-    val placeholderPrompt = stringResource(R.string.prompt_placeholder)
     val placeholderResult = stringResource(R.string.results_placeholder)
     var pickedImage by remember { mutableStateOf<Uri?>(null) }
-    val prompt by rememberSaveable { mutableStateOf(placeholderPrompt) }
+    val prompt by rememberSaveable { mutableStateOf(Utils.PROMPT) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val uiState by homeViewModel.uiState.collectAsState()
@@ -99,11 +100,7 @@ fun HomeScreen(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Toast.makeText(
-                context,
-                "Camera Permission Granted",
-                Toast.LENGTH_SHORT
-            ).show()
+            doTakePicture()
         } else {
             Toast.makeText(
                 context,
@@ -198,14 +195,22 @@ fun HomeScreen(
                             }
                             val scrollState = rememberScrollState()
                             Log.d("RESULT","Ini raw text = $result")
-                            Text(
-                                text = Utils.formatText(result),
-                                textAlign = TextAlign.Start,
-                                color = textColor,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(scrollState)
-                            )
+                            if (pickedImage == null){
+                                Text(
+                                    text = placeholderResult,
+                                    textAlign = TextAlign.Center,
+                                    color = textColor
+                                )
+                            } else {
+                                Text(
+                                    text = Utils.formatText(result),
+                                    textAlign = TextAlign.Start,
+                                    color = textColor,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(scrollState)
+                                )
+                            }
                         }
                     }
                 }
@@ -244,48 +249,53 @@ fun HomeScreen(
                     ) {
                         showDialog = true
                     }
-                if (pickedImage == null){
-                    Surface(
-                        modifier = imageModifier,
-                        color = Color.Transparent
-                    ) {
-                        Column(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                AnimatedContent(targetState = pickedImage, label = "Image") {
+                    if (it == null){
+                        Surface(
+                            modifier = imageModifier,
+                            color = Color.Transparent
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_add_photo_alternate_24),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(150.dp),
-                                colorFilter = ColorFilter.tint(Pink40)
-                            )
-                            Text(
-                                text = "Add Math or Physics Problem",
-                                fontWeight = FontWeight.SemiBold,
-                                color = Pink40
-                            )
+                            Column(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.baseline_add_photo_alternate_24),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(150.dp),
+                                    colorFilter = ColorFilter.tint(Pink40)
+                                )
+                                Text(
+                                    text = "Add Math or Physics Problem",
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Pink40
+                                )
+                            }
                         }
+                    } else {
+                        AsyncImage(
+                            modifier = imageModifier,
+                            model = pickedImage,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit
+                        )
                     }
-                } else {
-                    AsyncImage(
-                        modifier = imageModifier,
-                        model = pickedImage,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillWidth
-                    )
                 }
             }
         }
-        AnimatedVisibility(visible = showDialog) {
+        AnimatedVisibility(
+            visible = showDialog,
+            exit = ExitTransition.None
+        ) {
             LensDialog(
                 onDismiss = { showDialog = false },
                 onCamera = {
-                    if (!cameraPermissionState.status.isGranted && cameraPermissionState.status.shouldShowRationale) {
-                        // Show rationale if needed
+                    if (cameraPermissionState.status.isGranted) {
+                        doTakePicture()
                     } else {
                         requestPermissionLauncher.launch(Manifest.permission.CAMERA)
                     }
@@ -298,6 +308,14 @@ fun HomeScreen(
             )
         }
 
+    }
+
+    BackHandler(
+        enabled = isExpanded
+    ) {
+        scope.launch {
+            scaffoldState.bottomSheetState.partialExpand()
+        }
     }
 }
 

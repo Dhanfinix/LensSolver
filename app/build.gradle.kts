@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.camera.view)
     implementation(libs.camera.extensions)
     implementation(libs.permission)
+    implementation(libs.compose.nav)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
