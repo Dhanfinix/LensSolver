@@ -86,6 +86,7 @@ fun HomeScreen(
     val prompt by rememberSaveable { mutableStateOf(Utils.PROMPT) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
+    var showInfoDialog by rememberSaveable { mutableStateOf(false) }
     val uiState by homeViewModel.uiState.collectAsState()
     val context = LocalContext.current
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
@@ -222,16 +223,27 @@ fun HomeScreen(
                     .padding(16.dp)
             ){
 
-                Text(
-                    text = "Lens Solver",
-                    fontWeight = FontWeight.Black,
-                    textAlign = TextAlign.Center,
-                    color = Pink40,
-                    fontSize = 18.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                )
+                Box(Modifier.padding(bottom = 16.dp)) {
+                    Text(
+                        text = "Lens Solver",
+                        fontWeight = FontWeight.Black,
+                        textAlign = TextAlign.Center,
+                        color = Pink40,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_info_outline_24),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(Pink40),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .clickable {
+                            showInfoDialog = true
+                        }
+                    )
+                }
 
                 val imageModifier = Modifier
                     .fillMaxWidth()
@@ -306,6 +318,12 @@ fun HomeScreen(
                     )
                 }
             )
+        }
+        AnimatedVisibility(
+            visible = showInfoDialog,
+            exit = ExitTransition.None
+        ) {
+            InfoDialog { showInfoDialog = false }
         }
 
     }
