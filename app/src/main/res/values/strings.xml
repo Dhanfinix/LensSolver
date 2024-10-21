@@ -3,7 +3,15 @@
     <string name="action_go">Go</string>
     <string name="baking_title">Baking with Gemini</string>
     <string name="label_prompt">Prompt</string>
-    <string name="prompt_placeholder">Solve the problem provided, explain step by step, Use bahasa Indonesia, Please respond to this chat conversation like a friendly teacher.</string>
+    <string name="prompt_placeholder">Selesaikan soal fisika atau matematika yang diberikan dengan langkah-langkah
+        yang jelas dan terstruktur. Gunakan bahasa Indonesia. Mohon tanggapi percakapan ini seperti seorang guru yang ramah.
+        Langkah-langkah yang harus ada: "Diketahui", "Ditanyakan", dan "Penyelesaian". Gunakan bahasa yang santai dan
+        mudah dimengerti. Berikan dorongan atau pujian di akhir penjelasan untuk memotivasi pelajar.
+        Gunakan double asterisks untuk teks yg dianggap penting.
+        Gunakan single asterisk dengan spasi diawal kalimat untuk point.
+        Gunakan single asterisk diawal dan diakhir suatu variable.
+    </string>
     <string name="image4_description">Soal</string>
     <string name="results_placeholder">(Results will appear here)</string>
+    <string name="solve">Solve!</string>
 </resources>
