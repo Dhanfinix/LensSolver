@@ -2,6 +2,7 @@ package com.dhandev.lenssolver
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,33 +15,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeGestures
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemGesturesPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.material3.ripple
@@ -62,7 +54,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,7 +63,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.dhandev.lenssolver.ui.theme.LensSolverTheme
 import com.dhandev.lenssolver.ui.theme.Pink40
-import com.dhandev.lenssolver.ui.theme.Pink80
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,6 +78,9 @@ fun HomeScreen(
     var pickedImage by remember { mutableStateOf<Uri?>(null) }
     val prompt by rememberSaveable { mutableStateOf(placeholderPrompt) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
+    var showDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     val uiState by homeViewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -116,157 +109,172 @@ fun HomeScreen(
     )
     val peekSheetHeight = 128.dp
 
-    BottomSheetScaffold(
-        modifier = modifier,
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = peekSheetHeight,
-        sheetContent = {
-            Column(
-                Modifier.fillMaxSize(0.95f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AnimatedVisibility(visible = isExpanded.not()) {
-                    Row(modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth()
-                        .height(peekSheetHeight))
-                    {
-                        Button(
-                            onClick = {
-                                pickedImage = null
-                                result = placeholderResult
-                            },
-                            colors = ButtonDefaults.buttonColors().copy(
-                                containerColor = Pink40
-                            )
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_restart_alt_24),
-                                contentDescription = null
-                            )
-                        }
-                        Button(
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .fillMaxWidth(),
-                            enabled = prompt.isNotEmpty() && pickedImage != null,
-                            onClick = {
-                                val bitmap: Bitmap? = Utils.decodeUriToBitmap(context, pickedImage)
-                                bitmap?.let {
-                                    homeViewModel.sendPrompt(it, prompt)
-                                }
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.expand()
-                                }
+    Box{
+        BottomSheetScaffold(
+            modifier = modifier,
+            scaffoldState = scaffoldState,
+            sheetPeekHeight = peekSheetHeight,
+            sheetContent = {
+                Column(
+                    Modifier.fillMaxSize(0.95f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AnimatedVisibility(visible = isExpanded.not()) {
+                        Row(modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth()
+                            .height(peekSheetHeight))
+                        {
+                            Button(
+                                onClick = {
+                                    pickedImage = null
+                                    result = placeholderResult
+                                },
+                                colors = ButtonDefaults.buttonColors().copy(
+                                    containerColor = Pink40
+                                )
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.baseline_restart_alt_24),
+                                    contentDescription = null
+                                )
                             }
-                        ) {
-                            Text(text = stringResource(id = R.string.solve))
+                            Button(
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .fillMaxWidth(),
+                                enabled = prompt.isNotEmpty() && pickedImage != null,
+                                onClick = {
+                                    val bitmap: Bitmap? = Utils.decodeUriToBitmap(context, pickedImage)
+                                    bitmap?.let {
+                                        homeViewModel.sendPrompt(it, prompt)
+                                    }
+                                    scope.launch {
+                                        scaffoldState.bottomSheetState.expand()
+                                    }
+                                }
+                            ) {
+                                Text(text = stringResource(id = R.string.solve))
+                            }
                         }
                     }
-                }
-                // Expanded Content
+                    // Expanded Content
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    contentAlignment = Alignment.Center
-                ){
-                    if (uiState is UiState.Loading) {
-                        CircularProgressIndicator()
-                    } else {
-                        var textColor = MaterialTheme.colorScheme.onSurface
-                        if (uiState is UiState.Error) {
-                            textColor = MaterialTheme.colorScheme.error
-                            result = (uiState as UiState.Error).errorMessage
-                        } else if (uiState is UiState.Success) {
-                            textColor = MaterialTheme.colorScheme.onSurface
-                            result = (uiState as UiState.Success).outputText
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ){
+                        if (uiState is UiState.Loading) {
+                            CircularProgressIndicator()
+                        } else {
+                            var textColor = MaterialTheme.colorScheme.onSurface
+                            if (uiState is UiState.Error) {
+                                textColor = MaterialTheme.colorScheme.error
+                                result = (uiState as UiState.Error).errorMessage
+                            } else if (uiState is UiState.Success) {
+                                textColor = MaterialTheme.colorScheme.onSurface
+                                result = (uiState as UiState.Success).outputText
+                            }
+                            val scrollState = rememberScrollState()
+                            Log.d("RESULT","Ini raw text = $result")
+                            Text(
+                                text = Utils.formatText(result),
+                                textAlign = TextAlign.Start,
+                                color = textColor,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(scrollState)
+                            )
                         }
-                        val scrollState = rememberScrollState()
-                        Text(
-                            text = Utils.formatText(result),
-                            textAlign = TextAlign.Start,
-                            color = textColor,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState)
-                        )
                     }
                 }
             }
-        }
-    ) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ){
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ){
 
-            Text(
-                text = "Lens Solver",
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center,
-                color = Pink40,
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
-            val imageModifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.75f)
-                .background(
-                    MaterialTheme.colorScheme.surfaceContainer,
-                    shape = RoundedCornerShape(20.dp)
+                Text(
+                    text = "Lens Solver",
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center,
+                    color = Pink40,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
                 )
-                .clip(RoundedCornerShape(20.dp))
-                .clickable(
-                    indication = ripple(bounded = true),
-                    interactionSource = remember {
-                        MutableInteractionSource()
+
+                val imageModifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.75f)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clip(RoundedCornerShape(20.dp))
+                    .clickable(
+                        indication = ripple(bounded = true),
+                        interactionSource = remember {
+                            MutableInteractionSource()
+                        }
+                    ) {
+                        showDialog = true
                     }
-                ) {
+                if (pickedImage == null){
+                    Surface(
+                        modifier = imageModifier,
+                        color = Color.Transparent
+                    ) {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_add_photo_alternate_24),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(150.dp),
+                                colorFilter = ColorFilter.tint(Pink40)
+                            )
+                            Text(
+                                text = "Add Math or Physics Problem",
+                                fontWeight = FontWeight.SemiBold,
+                                color = Pink40
+                            )
+                        }
+                    }
+                } else {
+                    AsyncImage(
+                        modifier = imageModifier,
+                        model = pickedImage,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillWidth
+                    )
+                }
+            }
+        }
+        AnimatedVisibility(visible = showDialog) {
+            LensDialog(
+                onDismiss = { showDialog = false },
+                onCamera = {
+                    /**nothing*/
+                },
+                onPicker = {
                     imagePicker.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
                 }
-            if (pickedImage == null){
-                Surface(
-                    modifier = imageModifier,
-                    color = Color.Transparent
-                ) {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.baseline_add_photo_alternate_24),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(150.dp),
-                            colorFilter = ColorFilter.tint(Pink40)
-                        )
-                        Text(
-                            text = "Add Math or Physics Problem",
-                            fontWeight = FontWeight.SemiBold,
-                            color = Pink40
-                        )
-                    }
-                }
-            } else {
-                AsyncImage(
-                    modifier = imageModifier,
-                    model = pickedImage,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth
-                )
-            }
+            )
         }
+
     }
 }
 
