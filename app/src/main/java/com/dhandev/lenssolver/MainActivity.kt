@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,7 +55,13 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.safeGesturesPadding(),
                                 takenPhotoUri = capturedUri
                             ){
-                                navController.navigate(Destinations.CAMERA.route)
+                                navController.navigate(Destinations.CAMERA.route){
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    restoreState = true
+                                    launchSingleTop = true
+                                }
                             }
                         }
 

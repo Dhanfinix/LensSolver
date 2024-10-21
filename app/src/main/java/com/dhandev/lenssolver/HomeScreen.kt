@@ -83,7 +83,7 @@ fun HomeScreen(
 ) {
     val placeholderResult = stringResource(R.string.results_placeholder)
     var pickedImage by remember { mutableStateOf<Uri?>(null) }
-    val prompt by rememberSaveable { mutableStateOf(Utils.PROMPT) }
+    var prompt by rememberSaveable { mutableStateOf(Utils.PROMPT) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var showInfoDialog by rememberSaveable { mutableStateOf(false) }
@@ -146,6 +146,7 @@ fun HomeScreen(
                                 onClick = {
                                     pickedImage = null
                                     result = placeholderResult
+                                    prompt = Utils.PROMPT
                                 },
                                 colors = ButtonDefaults.buttonColors().copy(
                                     containerColor = Pink40
@@ -217,10 +218,14 @@ fun HomeScreen(
                 }
             }
         ) {
+            val baseScrolllState = rememberScrollState()
+
             Column(
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp)
+                    .padding(bottom = 70.dp)
+                    .verticalScroll(baseScrolllState)
             ){
 
                 Box(Modifier.padding(bottom = 16.dp)) {
@@ -240,14 +245,14 @@ fun HomeScreen(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .clickable {
-                            showInfoDialog = true
-                        }
+                                showInfoDialog = true
+                            }
                     )
                 }
 
                 val imageModifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.75f)
+                    .height(400.dp)
                     .background(
                         MaterialTheme.colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(20.dp)
@@ -296,6 +301,14 @@ fun HomeScreen(
                             contentScale = ContentScale.Fit
                         )
                     }
+
+                }
+
+                PromptInputComp(
+                    Modifier.padding(top = 8.dp),
+                    value = if (prompt == Utils.PROMPT) "" else prompt
+                ) {newPrompt->
+                    prompt = newPrompt
                 }
             }
         }
