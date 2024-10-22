@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.dhandev.lenssolver.component.ZoomableAsyncImage
 import com.dhandev.lenssolver.ui.theme.LensSolverTheme
 import com.dhandev.lenssolver.ui.theme.Pink40
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -294,12 +295,12 @@ fun HomeScreen(
                             }
                         }
                     } else {
-                        AsyncImage(
+                        ZoomableAsyncImage(
                             modifier = imageModifier,
-                            model = pickedImage,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit
-                        )
+                            uri = pickedImage
+                        ){
+                            showDialog = true
+                        }
                     }
 
                 }

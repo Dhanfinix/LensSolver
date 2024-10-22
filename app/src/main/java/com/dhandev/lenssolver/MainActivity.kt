@@ -2,6 +2,7 @@ package com.dhandev.lenssolver
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,16 +51,14 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry->
                             val capturedUriString = backStackEntry.arguments?.getString(Destinations.HOME.argument)
                             val capturedUri = capturedUriString?.let { Uri.parse(it) }
+                            Log.d("AtHomeUri", capturedUriString.toString())
 
                             HomeScreen(
                                 modifier = Modifier.safeGesturesPadding(),
                                 takenPhotoUri = capturedUri
                             ){
                                 navController.navigate(Destinations.CAMERA.route){
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    restoreState = true
+                                    popUpTo(navController.graph.findStartDestination().id) {}
                                     launchSingleTop = true
                                 }
                             }
@@ -73,7 +72,9 @@ class MainActivity : ComponentActivity() {
                                 delegate = object : CameraDelegate {
                                 override fun onCaptured(uri: Uri) {
                                     // Navigate back to HomeScreen and pass the Uri as a string, removing CameraScreen from the backstack
-                                    navController.navigate("${Destinations.HOME.route}?${Destinations.HOME.argument}=${Uri.encode(uri.toString())}") {
+                                    val route = "${Destinations.HOME.route}?${Destinations.HOME.argument}=${Uri.encode(uri.toString())}"
+                                    Log.d("ToHome", route)
+                                    navController.navigate(route) {
                                         popUpTo(Destinations.HOME.route) { inclusive = true }
                                         restoreState = true
                                         launchSingleTop = true
