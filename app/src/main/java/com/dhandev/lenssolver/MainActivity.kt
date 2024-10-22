@@ -75,12 +75,16 @@ class MainActivity : ComponentActivity() {
                                     // Navigate back to HomeScreen and pass the Uri as a string, removing CameraScreen from the backstack
                                     navController.navigate("${Destinations.HOME.route}?${Destinations.HOME.argument}=${Uri.encode(uri.toString())}") {
                                         popUpTo(Destinations.HOME.route) { inclusive = true }
+                                        restoreState = true
+                                        launchSingleTop = true
                                     }
                                 }
 
                                 override fun onBackClicked() {
                                     navController.navigate(Destinations.HOME.route) {
                                         popUpTo(Destinations.HOME.route) { inclusive = true }
+                                        restoreState = true
+                                        launchSingleTop = true
                                     }
                                 }
                             })

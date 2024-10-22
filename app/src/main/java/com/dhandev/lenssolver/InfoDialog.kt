@@ -12,10 +12,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dhandev.lenssolver.component.BulletListComp
 import com.dhandev.lenssolver.ui.theme.Pink40
 
 
@@ -28,7 +30,7 @@ fun InfoDialog(
     BasicAlertDialog(onDismissRequest = { onDismiss() }) {
         val btnModifier = Modifier.fillMaxWidth()
         Card{
-            Column(modifier.padding(16.dp)) {
+            Column(Modifier.padding(16.dp)) {
                 Text(
                     modifier = btnModifier,
                     text = "Informasi",
@@ -38,15 +40,17 @@ fun InfoDialog(
                     color = Pink40
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    modifier = btnModifier,
-                    text = "Agar hasil lebih maksimal, perhatikan hal-hal berikut:" +
-                            "\n• Gunakan gambar yang jelas tulisannya" +
-                            "\n• Lebih disarankan ambil gambar dari Galeri" +
-                            "\n• Gambar hanya menampilkan satu soal" +
-                            "\n• Pastikan internet stabil" +
-                            "\n• Jangan spam \"Solve\" dalam waktu berdekatan",
-                    textAlign = TextAlign.Start
+                BulletListComp(
+                    btnModifier,
+                    items = listOf(
+                        "Gunakan gambar yang jelas tulisannya",
+                        "Lebih disarankan ambil gambar dari Galeri",
+                        "Gambar hanya menampilkan satu soal",
+                        "Pastikan internet stabil",
+                        "Jangan spam \"Solve\" dalam waktu berdekatan"
+                    ),
+                    style = TextStyle(),
+                    lineSpacing = 2.dp
                 )
             }
         }

@@ -38,7 +38,7 @@ fun PromptInputComp(
         },
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, Pink40, RoundedCornerShape(20.dp))
+            .border(2.dp, Pink40, RoundedCornerShape(20.dp))
             .clip(RoundedCornerShape(20.dp)), // No border here
         textStyle = textStyle,
         decorationBox = { innerTextField ->
@@ -50,7 +50,7 @@ fun PromptInputComp(
                     Text(
                         text = "Masukkan perintah kustom jika diperlukan",
                         maxLines = 3,
-                        color = Color.LightGray,
+                        color = Color.Gray,
                         style = textStyle
                     )
                 }

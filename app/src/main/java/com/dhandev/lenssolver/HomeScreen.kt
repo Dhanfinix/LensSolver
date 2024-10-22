@@ -232,7 +232,7 @@ fun HomeScreen(
                     Text(
                         text = "Lens Solver",
                         fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start,
                         color = Pink40,
                         fontSize = 18.sp,
                         modifier = Modifier
