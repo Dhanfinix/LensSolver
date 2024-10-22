@@ -6,9 +6,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +24,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.dhandev.lenssolver.R
 
 @Composable
@@ -35,16 +36,23 @@ fun ZoomableAsyncImage(
     var scale by remember { mutableFloatStateOf(1f) }
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
+    var panSpeed by remember { mutableFloatStateOf(1.5f) }
 
     val maxScale = 3f
     val minScale = 1f
+    LaunchedEffect(scale) {
+        panSpeed = if (scale < 2) 1.5f else 4.5f
+    }
 
     Box{
         AsyncImage(
             model = myUri,
             contentDescription = null,
             modifier = modifier
-                .clickable { }
+                .clickable(
+                    indication = null,
+                    interactionSource = MutableInteractionSource()
+                ) { }
                 .graphicsLayer(
                     scaleX = scale,
                     scaleY = scale,
@@ -54,8 +62,8 @@ fun ZoomableAsyncImage(
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoom, _ ->
                         scale = (scale * zoom).coerceIn(minScale, maxScale)
-                        offsetX += pan.x * 2.5f
-                        offsetY += pan.y * 2.5f
+                        offsetX += pan.x * panSpeed
+                        offsetY += pan.y * panSpeed
                     }
                 }
                 .pointerInput(Unit) {

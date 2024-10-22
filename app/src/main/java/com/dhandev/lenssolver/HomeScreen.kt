@@ -225,7 +225,7 @@ fun HomeScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .padding(bottom = 70.dp)
+                    .padding(bottom = peekSheetHeight)
                     .verticalScroll(baseScrolllState)
             ){
 
@@ -253,7 +253,7 @@ fun HomeScreen(
 
                 val imageModifier = Modifier
                     .fillMaxWidth()
-                    .height(400.dp)
+                    .fillMaxHeight()
                     .background(
                         MaterialTheme.colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(20.dp)
@@ -267,10 +267,11 @@ fun HomeScreen(
                     ) {
                         showDialog = true
                     }
-                AnimatedContent(targetState = pickedImage, label = "Image") {
+                AnimatedContent(
+                    modifier = imageModifier.weight(1f),
+                    targetState = pickedImage, label = "Image") {
                     if (it == null){
                         Surface(
-                            modifier = imageModifier,
                             color = Color.Transparent
                         ) {
                             Column(

@@ -1,16 +1,16 @@
 package com.dhandev.lenssolver
 
-enum class Destinations {
-    HOME{
-        override val route = "HomeScreen"
-        override val routeWithArgs = "HomeScreen?capturedUri={capturedUri}"
-        override val argument = "capturedUri"
-    },
-    CAMERA{
-        override val route = "CameraScreen"
-    };
+import kotlinx.serialization.Serializable
 
-    abstract val route : String
-    open val routeWithArgs : String = ""
-    open val argument : String = ""
-}
+/** Only use simple data type, the workaround is implementing Gson converter
+ * @see <a href=https://developer.android.com/develop/ui/compose/navigation#retrieving-complex-data>Documentation</a>
+ * */
+@Serializable
+data class HomeDestination(
+    val capturedUriString : String? = null
+)
+
+/** If the destination doesn't need any argument, just use object
+ * */
+@Serializable
+object CameraDestination

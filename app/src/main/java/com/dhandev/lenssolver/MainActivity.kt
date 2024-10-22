@@ -3,10 +3,16 @@ package com.dhandev.lenssolver
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.dhandev.lenssolver.ui.theme.LensSolverTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,50 +45,82 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = Destinations.HOME.route
+                        startDestination = HomeDestination()
                     ){
-                        composable(
-                            route = Destinations.HOME.routeWithArgs,
-                            arguments = listOf(navArgument(Destinations.HOME.argument) {
-                                nullable = true
-                                type = NavType.StringType
-                            })
+                        composable<HomeDestination>(
+                            enterTransition = {
+                                fadeIn(
+                                    animationSpec = tween(
+                                        500
+                                    )
+                                ) + slideIntoContainer(
+                                    animationSpec = tween(500, easing = EaseIn),
+                                    towards = AnimatedContentTransitionScope.SlideDirection.Down
+                                )
+                            },
+                            exitTransition = {
+                                fadeOut(
+                                    animationSpec = tween(
+                                        500
+                                    )
+                                ) + slideOutOfContainer(
+                                    animationSpec = tween(500, easing = EaseOut),
+                                    towards = AnimatedContentTransitionScope.SlideDirection.Up
+                                )
+                            }
                         ) { backStackEntry->
-                            val capturedUriString = backStackEntry.arguments?.getString(Destinations.HOME.argument)
-                            val capturedUri = capturedUriString?.let { Uri.parse(it) }
-                            Log.d("AtHomeUri", capturedUriString.toString())
+                            val args = backStackEntry.toRoute<HomeDestination>()
+                            val capturedUri = args.capturedUriString?.let { Uri.parse(it) }
 
                             HomeScreen(
                                 modifier = Modifier.safeGesturesPadding(),
                                 takenPhotoUri = capturedUri
                             ){
-                                navController.navigate(Destinations.CAMERA.route){
+                                navController.navigate(CameraDestination){
                                     popUpTo(navController.graph.findStartDestination().id) {}
                                     launchSingleTop = true
                                 }
                             }
                         }
 
-                        composable(
-                            route = Destinations.CAMERA.route
+                        composable<CameraDestination>(
+                            enterTransition = {
+                                fadeIn(
+                                    animationSpec = tween(
+                                        500
+                                    )
+                                ) + slideIntoContainer(
+                                    animationSpec = tween(500, easing = EaseIn),
+                                    towards = AnimatedContentTransitionScope.SlideDirection.Up
+                                )
+                            },
+                            exitTransition = {
+                                fadeOut(
+                                    animationSpec = tween(
+                                        500
+                                    )
+                                ) + slideOutOfContainer(
+                                    animationSpec = tween(500, easing = EaseOut),
+                                    towards = AnimatedContentTransitionScope.SlideDirection.Down
+                                )
+                            }
                         ) {
                             CameraScreen(
                                 modifier = Modifier.safeGesturesPadding(),
                                 delegate = object : CameraDelegate {
                                 override fun onCaptured(uri: Uri) {
                                     // Navigate back to HomeScreen and pass the Uri as a string, removing CameraScreen from the backstack
-                                    val route = "${Destinations.HOME.route}?${Destinations.HOME.argument}=${Uri.encode(uri.toString())}"
-                                    Log.d("ToHome", route)
-                                    navController.navigate(route) {
-                                        popUpTo(Destinations.HOME.route) { inclusive = true }
+                                    val newRoute = HomeDestination(uri.toString())
+                                    navController.navigate(newRoute) {
+                                        popUpTo(HomeDestination()) { inclusive = true }
                                         restoreState = true
                                         launchSingleTop = true
                                     }
                                 }
 
                                 override fun onBackClicked() {
-                                    navController.navigate(Destinations.HOME.route) {
-                                        popUpTo(Destinations.HOME.route) { inclusive = true }
+                                    navController.navigate(HomeDestination()) {
+                                        popUpTo(HomeDestination()) { inclusive = true }
                                         restoreState = true
                                         launchSingleTop = true
                                     }

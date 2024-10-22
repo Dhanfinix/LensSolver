@@ -2,6 +2,7 @@ package com.dhandev.lenssolver
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
@@ -93,8 +94,7 @@ fun CameraScreen(
                     }
                     orientationEventListener.enable()
 
-                    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                    val rotation = windowManager.defaultDisplay?.rotation ?: Surface.ROTATION_0
+                    val rotation = context.display?.rotation ?: Surface.ROTATION_0
                     imageCapture?.targetRotation = rotation
 
                     runCatching {
@@ -175,7 +175,7 @@ fun CameraScreen(
 
 private fun captureImage(context: Context, imageCapture: ImageCapture?, onImageTaken: (Uri) -> Unit) {
     val photoFile = File(
-        context.externalMediaDirs.firstOrNull(),
+        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
         "IMG_${System.currentTimeMillis()}.jpg"
     )
     val photoUri = Uri.fromFile(photoFile)
