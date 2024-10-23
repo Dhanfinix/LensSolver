@@ -25,12 +25,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -220,26 +222,43 @@ fun HomeScreen(
                                 )
                             } else {
                                 val htmlContent = resultHtmlWrapper(result)
-                                AndroidView(
-                                    modifier = Modifier
-                                        .padding(start = 16.dp)
-                                        .align(Alignment.TopCenter)
-                                        .verticalScroll(scrollState),
-                                    factory = {
-                                    WebView(it).apply {
-                                        layoutParams = ViewGroup.LayoutParams(
-                                            ViewGroup.LayoutParams.MATCH_PARENT,
-                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                Column {
+                                    Row(modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp, top = 4.dp)
+                                        .background(Color.Yellow.copy(0.5f)),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Image(
+                                            modifier = Modifier.padding(2.dp),
+                                            painter = painterResource(id = R.drawable.baseline_warning_24), contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Jawaban dibuat oleh AI, pastikan cek kembali hasilnya",
+                                            fontSize = 12.sp
                                         )
-                                        webViewClient = WebViewClient()
-                                        isVerticalScrollBarEnabled = false
-                                        settings.javaScriptEnabled = true
-                                        setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                                        loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
                                     }
-                                }, update = {
-                                    it.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-                                })
+                                    AndroidView(
+                                        modifier = Modifier
+                                            .padding(start = 16.dp, top = 4.dp)
+                                            .verticalScroll(scrollState),
+                                        factory = {
+                                        WebView(it).apply {
+                                            layoutParams = ViewGroup.LayoutParams(
+                                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                                ViewGroup.LayoutParams.WRAP_CONTENT
+                                            )
+                                            webViewClient = WebViewClient()
+                                            isVerticalScrollBarEnabled = false
+                                            settings.javaScriptEnabled = true
+                                            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                                            loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                                        }
+                                    }, update = {
+                                        it.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                                    })
+                                }
                             }
                         }
                     }
