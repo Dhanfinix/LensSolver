@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,11 +31,13 @@ fun LensDialog(
         val btnColor = ButtonDefaults.buttonColors(
             containerColor = Pink40
         )
+        val cornerDp = 8.dp
         Card{
             Column(modifier.padding(16.dp)) {
                 Button(
                     modifier = btnModifier,
                     colors = btnColor,
+                    shape = RoundedCornerShape(topStart = cornerDp, topEnd = cornerDp),
                     onClick = {
                         onDismiss()
                         onPicker()
@@ -42,10 +45,10 @@ fun LensDialog(
                 ) {
                     Text(text = "Pick from Gallery")
                 }
-                Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     modifier = btnModifier,
                     colors = btnColor,
+                    shape = RoundedCornerShape(bottomStart = cornerDp, bottomEnd = cornerDp),
                     onClick = {
                         onDismiss()
                         onCamera()

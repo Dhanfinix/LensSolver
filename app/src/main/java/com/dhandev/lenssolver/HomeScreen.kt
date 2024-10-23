@@ -64,9 +64,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,6 +81,7 @@ import com.dhandev.lenssolver.component.HtmlText
 import com.dhandev.lenssolver.component.ZoomableAsyncImage
 import com.dhandev.lenssolver.ui.theme.LensSolverTheme
 import com.dhandev.lenssolver.ui.theme.Pink40
+import com.dhandev.lenssolver.ui.theme.Purple40
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -255,11 +258,16 @@ fun HomeScreen(
 
                 Box(Modifier.padding(bottom = 16.dp)) {
                     Text(
-                        text = "Lens Solver",
-                        fontWeight = FontWeight.Black,
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = Pink40, fontWeight = FontWeight.SemiBold)){
+                                append("Len")
+                            }
+                            withStyle(style = SpanStyle(color = Purple40, fontWeight = FontWeight.Black)){
+                                append("Solver")
+                            }
+                        },
                         textAlign = TextAlign.Start,
-                        color = Pink40,
-                        fontSize = 18.sp,
+                        fontSize = 22.sp,
                         modifier = Modifier
                             .fillMaxWidth()
                     )

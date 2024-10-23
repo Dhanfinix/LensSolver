@@ -3,12 +3,17 @@ package com.dhandev.lenssolver.component
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +32,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.dhandev.lenssolver.R
+import com.dhandev.lenssolver.conditional
+import com.dhandev.lenssolver.ui.theme.Purple40
+
+/** This Code is co-created with Claude AI
+ * @see <a href=https://claude.site/artifacts/a6857816-b591-4b25-8097-d01f22741d80>Claude AI</a>
+ * */
 
 @Composable
 fun ZoomableAsyncImage(
@@ -51,7 +64,7 @@ fun ZoomableAsyncImage(
             modifier = modifier
                 .clickable(
                     indication = null,
-                    interactionSource = MutableInteractionSource()
+                    interactionSource = remember { MutableInteractionSource() }
                 ) { }
                 .graphicsLayer(
                     scaleX = scale,
@@ -101,30 +114,41 @@ fun ZoomableAsyncImage(
                 },
             contentScale = ContentScale.Fit
         )
-        Image(
-            painter = painterResource(id = R.drawable.baseline_find_replace_24),
-            contentDescription = null,
+
+        Row(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .clickable { doChange() }
-                .padding(16.dp)
-        )
-        AnimatedVisibility(
-            visible = scale != 1f || offsetY != 0f || offsetX != 0f,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            fun btnModifier(isLeft: Boolean) = Modifier
+                .conditional(isLeft,
+                    ifTrue = {background(Purple40, RoundedCornerShape(topEnd = 30.dp))},
+                    ifFalse = {background(Purple40, RoundedCornerShape(topStart = 30.dp))}
+                )
+                .padding(16.dp)
             Image(
-                painter = painterResource(id = R.drawable.baseline_crop_free_24),
+                painter = painterResource(id = R.drawable.baseline_find_replace_24),
                 contentDescription = null,
-                modifier = Modifier
-                    .clickable {
-                        scale = 1f
-                        offsetX = 0f
-                        offsetY = 0f
-                    }
-                    .padding(16.dp)
+                modifier = btnModifier(true)
+                    .clickable { doChange() }
             )
+            AnimatedVisibility(
+                visible = scale != 1f || offsetY != 0f || offsetX != 0f,
+                modifier = Modifier
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_crop_free_24),
+                    contentDescription = null,
+                    modifier = btnModifier(false)
+                        .clickable {
+                            scale = 1f
+                            offsetX = 0f
+                            offsetY = 0f
+                        }
+                )
+            }
         }
+
     }
 }
