@@ -49,7 +49,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhandev.lenssolver.component.CameraGridComp
-import com.dhandev.lenssolver.ui.theme.Pink40
 import java.io.File
 import kotlin.random.Random
 
