@@ -3,7 +3,12 @@ package com.dhandev.lenssolver
 import android.Manifest
 import android.graphics.Bitmap
 import android.net.Uri
+import android.text.Html
+import android.text.Spannable
 import android.util.Log
+import android.view.ViewGroup
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -59,13 +64,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.dhandev.lenssolver.Utils.resultHtmlWrapper
+import com.dhandev.lenssolver.component.HtmlText
 import com.dhandev.lenssolver.component.ZoomableAsyncImage
 import com.dhandev.lenssolver.ui.theme.LensSolverTheme
 import com.dhandev.lenssolver.ui.theme.Pink40
@@ -181,8 +191,7 @@ fun HomeScreen(
 
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ){
                         if (uiState is UiState.Loading) {
@@ -200,19 +209,34 @@ fun HomeScreen(
                             Log.d("RESULT","Ini raw text = $result")
                             if (pickedImage == null){
                                 Text(
+                                    modifier = Modifier
+                                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                                     text = placeholderResult,
                                     textAlign = TextAlign.Center,
                                     color = textColor
                                 )
                             } else {
-                                Text(
-                                    text = Utils.formatText(result),
-                                    textAlign = TextAlign.Start,
-                                    color = textColor,
+                                val htmlContent = resultHtmlWrapper(result)
+                                AndroidView(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(scrollState)
-                                )
+                                        .padding(start = 16.dp)
+                                        .align(Alignment.TopCenter)
+                                        .verticalScroll(scrollState),
+                                    factory = {
+                                    WebView(it).apply {
+                                        layoutParams = ViewGroup.LayoutParams(
+                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                        )
+                                        webViewClient = WebViewClient()
+                                        isVerticalScrollBarEnabled = false
+                                        settings.javaScriptEnabled = true
+                                        setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                                        loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                                    }
+                                }, update = {
+                                    it.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                                })
                             }
                         }
                     }

@@ -24,14 +24,40 @@ object Utils {
             "Diketahui: Sebutkan informasi yang sudah diberikan pada soal.\n" +
             "Ditanyakan: Tentukan apa yang perlu dicari dari soal.\n" +
             "Penyelesaian: Jelaskan langkah-langkah penyelesaian dengan urut dan lengkap, sertakan rumus yang digunakan, dan pastikan solusi yang diberikan sesuai dengan soal.\n" +
-            "Format jawaban yang benar:\n" +
-            "Gunakan bungkus teks dengan double asterisks untuk menandai teks yang dianggap penting (misalnya rumus atau hasil akhir).\n" +
-            "Gunakan single asterisk dengan spasi diawal kalimat untuk membuat poin-poin penting dalam penjelasan (contoh: * ini merupakan awal kalimat).\n" +
-            "Gunakan single asterisk di awal dan akhir variabel yang digunakan dalam rumus (contoh: *v* atau *g*).\n" +
-            "Gunakan unicode untuk superscript dan subscript, jika tidak ada yang cocok Gunakan tag <sub> untuk subscript dan tag <sup>** untuk superscript, jika diperlukan (contoh: H<sub>2</sub>O atau x<sup>2</sup>).\n" +
-            "Jika langkah-langkah atau format tersebut tidak bisa dilakukan, gunakan format apa saja" +
+            "Bungkus Jawaban tersebut dalam format HTML atau MathJax jika perlu" +
+            "tidak perlu ada kata html diawal, tidak perlu tiga backticks, " +
+            "gunakan <p> untuk setiap baris " +
+            "gunakan <b> pada kata atau kalimat penting " +
+            "gunakan <i> pada variable " +
+            "gunakan <ul> dan <li> untuk bullet point " +
+            "gunakan <sub> untuk subscript " +
+            "gunakan <sup> untuk superscript " +
             "Jika tidak ada soal terdeteksi, jawab dengan: Soal tidak ditemukan, coba lagi dengan gambar lain ya."
     const val IMAGE_IDENTIFY_PROMPT = "Jelaskan gambar ini"
+    fun resultHtmlWrapper(result: String) =
+        """
+            <html>
+                <head>
+                    <title>My HTML Page</title>
+                    <style>
+                        body {
+                            background-color: transparent;
+                            color: black; /* Set text color to ensure it's visible against a transparent background */
+                            margin: 0; /* Remove default margin */
+                            padding: 0; /* Remove default padding */
+                            display: block; /* Ensure the body behaves like a block element */
+                        }
+                    </style>
+                    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+                    <script type="text/javascript" id="MathJax-script" async
+                      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.0.0/es5/latest?tex-mml-chtml.js">
+                    </script>
+                </head>
+                <body>
+                    $result
+                </body>
+            </html>
+        """
     fun decodeUriToBitmap(context: Context, imageUri: Uri?): Bitmap? {
         if (imageUri == null){
             return null
@@ -44,69 +70,4 @@ object Utils {
             null
         }
     }
-
-    fun formatText(text: String): AnnotatedString =
-        buildAnnotatedString {
-            var currentIndex = 0
-
-            // Updated regex to handle bullet points and italic text inside parentheses or within text
-            val regex = "(\\*\\*(.*?)\\*\\*)|(\\*(.*?)\\*)|(<sub>(.*?)</sub>)|(<sup>(.*?)</sup>)|(^\\*\\s(.*?)(?=$|\\n))|\\(\\*(.*?)\\*\\)".toRegex()
-
-            regex.findAll(text).forEach { matchResult ->
-                val startIndex = matchResult.range.first
-                val endIndex = matchResult.range.last
-
-                // Append the text before the match
-                append(text.substring(currentIndex, startIndex))
-
-                when {
-                    // Handle bold text
-                    matchResult.groupValues[2].isNotEmpty() -> {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(matchResult.groupValues[2])
-                        }
-                    }
-                    // Handle italic text (including text like *m* within bullet points)
-                    matchResult.groupValues[4].isNotEmpty() -> {
-                        withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(matchResult.groupValues[4])
-                        }
-                    }
-                    // Handle subscript text
-                    matchResult.groupValues[6].isNotEmpty() -> {
-                        withStyle(style = SpanStyle(fontSize = 12.sp, baselineShift = BaselineShift.Subscript)) {
-                            append(matchResult.groupValues[6])
-                        }
-                    }
-                    // Handle superscript text
-                    matchResult.groupValues[8].isNotEmpty() -> {
-                        withStyle(style = SpanStyle(fontSize = 12.sp, baselineShift = BaselineShift.Superscript)) {
-                            append(matchResult.groupValues[8])
-                        }
-                    }
-                    // Handle bullet points
-                    matchResult.groupValues[10].isNotEmpty() -> {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal, color = Color.Black)) {
-                            append("• ") // Bullet symbol
-                            append(matchResult.groupValues[10])
-                        }
-                    }
-                    // Handle text inside parentheses with asterisks (only apply italic to text inside parentheses)
-//                    matchResult.groupValues[12].isNotEmpty() -> {
-//                        append("(") // Add opening parentheses
-//                        withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-//                            append(matchResult.groupValues[12]) // Only apply italic to text inside asterisks
-//                        }
-//                        append(")") // Add closing parentheses
-//                    }
-                }
-
-                // Update the current index
-                currentIndex = endIndex + 1
-            }
-
-            // Append the remaining text after the last match
-            append(text.substring(currentIndex))
-        }
-
 }

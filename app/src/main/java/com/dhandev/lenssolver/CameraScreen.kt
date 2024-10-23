@@ -2,6 +2,7 @@ package com.dhandev.lenssolver
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import android.view.OrientationEventListener
@@ -15,12 +16,17 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +49,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhandev.lenssolver.component.CameraGridComp
+import com.dhandev.lenssolver.ui.theme.Pink40
 import java.io.File
 import kotlin.random.Random
 
@@ -94,7 +101,12 @@ fun CameraScreen(
                     }
                     orientationEventListener.enable()
 
-                    val rotation = context.display?.rotation ?: Surface.ROTATION_0
+                    val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        context.display?.rotation ?: Surface.ROTATION_0
+                    } else {
+                        @Suppress("DEPRECATION")
+                        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.rotation
+                    }
                     imageCapture?.targetRotation = rotation
 
                     runCatching {
@@ -155,17 +167,21 @@ fun CameraScreen(
         }
 
         Button(
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            ),
             onClick = {
                 captureImage(localContext, imageCapture) {
                     delegate.onCaptured(it)
                 }
             },
             modifier = Modifier
+                .padding(bottom = 50.dp)
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        ) {
-            Text(text = "Take Picture")
-        }
+                .size(75.dp)
+                .background(Color.Transparent, RoundedCornerShape(100))
+                .border(5.dp, Color.White, RoundedCornerShape(100))
+        ) {}
 
         if (showGrid) {
             CameraGridComp()
