@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/** Gemini 1.5 Flash - Free Tier
+ * @see <a href=https://ai.google.dev/pricing#1_5flash>Gemini Pricing</a>
+ * */
 class HomeViewModel : ViewModel() {
     private val _uiState: MutableStateFlow<UiState> =
         MutableStateFlow(UiState.Initial)

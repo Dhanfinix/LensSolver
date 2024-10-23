@@ -32,6 +32,7 @@ object Utils {
             "gunakan <ul> dan <li> untuk bullet point " +
             "gunakan <sub> untuk subscript " +
             "gunakan <sup> untuk superscript " +
+            "gunakan <b> untuk vektor " +
             "Jika tidak ada soal terdeteksi, jawab dengan: Soal tidak ditemukan, coba lagi dengan gambar lain ya."
     const val IMAGE_IDENTIFY_PROMPT = "Jelaskan gambar ini"
     fun resultHtmlWrapper(result: String) =

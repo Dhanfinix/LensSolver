@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -149,7 +150,7 @@ fun HomeScreen(
             sheetPeekHeight = peekSheetHeight,
             sheetContent = {
                 Column(
-                    Modifier.fillMaxSize(0.95f),
+                    Modifier.fillMaxHeight(0.95f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedVisibility(visible = isExpanded.not()) {
@@ -193,7 +194,6 @@ fun HomeScreen(
                         }
                     }
                     // Expanded Content
-
                     Box(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -210,9 +210,8 @@ fun HomeScreen(
                                 textColor = MaterialTheme.colorScheme.onSurface
                                 result = (uiState as UiState.Success).outputText
                             }
-                            val scrollState = rememberScrollState()
-                            Log.d("RESULT","Ini raw text = $result")
-                            if (pickedImage == null){
+                            Log.d("RESULT", result)
+                            if (result == placeholderResult){
                                 Text(
                                     modifier = Modifier
                                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
@@ -222,42 +221,47 @@ fun HomeScreen(
                                 )
                             } else {
                                 val htmlContent = resultHtmlWrapper(result)
-                                Column {
-                                    Row(modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp, top = 4.dp)
-                                        .background(Color.Yellow.copy(0.5f)),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Image(
-                                            modifier = Modifier.padding(2.dp),
-                                            painter = painterResource(id = R.drawable.baseline_warning_24), contentDescription = null)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Jawaban dibuat oleh AI, pastikan cek kembali hasilnya",
-                                            fontSize = 12.sp
+                                LazyColumn {
+                                    item {
+                                        Row(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                            .background(Color.Yellow.copy(0.5f), RoundedCornerShape(6.dp)),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Image(
+                                                modifier = Modifier.padding(2.dp),
+                                                painter = painterResource(id = R.drawable.baseline_warning_24), contentDescription = null)
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Jawaban dibuat oleh AI, pastikan cek kembali hasilnya",
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                    }
+                                    item {
+                                        AndroidView(
+                                            modifier = Modifier
+                                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                            factory = {
+                                                WebView(it).apply {
+                                                    layoutParams = ViewGroup.LayoutParams(
+                                                        ViewGroup.LayoutParams.MATCH_PARENT,
+                                                        ViewGroup.LayoutParams.WRAP_CONTENT
+                                                    )
+                                                    webViewClient = WebViewClient()
+                                                    isVerticalScrollBarEnabled = false
+                                                    isNestedScrollingEnabled = false
+                                                    settings.javaScriptEnabled = true
+                                                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                                                    loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                                                }
+                                            }, update = {
+                                                it.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                                            }
                                         )
                                     }
-                                    AndroidView(
-                                        modifier = Modifier
-                                            .padding(start = 16.dp, top = 4.dp)
-                                            .verticalScroll(scrollState),
-                                        factory = {
-                                        WebView(it).apply {
-                                            layoutParams = ViewGroup.LayoutParams(
-                                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                                ViewGroup.LayoutParams.WRAP_CONTENT
-                                            )
-                                            webViewClient = WebViewClient()
-                                            isVerticalScrollBarEnabled = false
-                                            settings.javaScriptEnabled = true
-                                            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                                            loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-                                        }
-                                    }, update = {
-                                        it.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-                                    })
                                 }
                             }
                         }
