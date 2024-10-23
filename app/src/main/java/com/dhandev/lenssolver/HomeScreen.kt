@@ -52,6 +52,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -206,12 +207,18 @@ fun HomeScreen(
                             if (uiState is UiState.Error) {
                                 textColor = MaterialTheme.colorScheme.error
                                 result = (uiState as UiState.Error).errorMessage
+                                homeViewModel.resetUiState()
                             } else if (uiState is UiState.Success) {
                                 textColor = MaterialTheme.colorScheme.onSurface
                                 result = (uiState as UiState.Success).outputText
+                                homeViewModel.resetUiState()
                             }
                             Log.d("RESULT", result)
-                            if (result == placeholderResult){
+
+                            val isEmpty by remember {
+                                derivedStateOf { result == placeholderResult }
+                            }
+                            if (isEmpty){
                                 Text(
                                     modifier = Modifier
                                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
@@ -221,12 +228,17 @@ fun HomeScreen(
                                 )
                             } else {
                                 val htmlContent = resultHtmlWrapper(result)
-                                LazyColumn {
+                                LazyColumn(
+                                    Modifier.align(Alignment.TopCenter)
+                                ) {
                                     item {
                                         Row(modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 16.dp, vertical = 4.dp)
-                                            .background(Color.Yellow.copy(0.5f), RoundedCornerShape(6.dp)),
+                                            .background(
+                                                Color.Yellow.copy(0.5f),
+                                                RoundedCornerShape(6.dp)
+                                            ),
                                             horizontalArrangement = Arrangement.Center,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {

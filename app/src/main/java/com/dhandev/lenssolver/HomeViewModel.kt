@@ -25,6 +25,10 @@ class HomeViewModel : ViewModel() {
         apiKey = BuildConfig.apiKey
     )
 
+    fun resetUiState(){
+        _uiState.value = UiState.Initial
+    }
+
     fun sendPrompt(
         bitmap: Bitmap,
         prompt: String
