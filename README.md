@@ -1,4 +1,5 @@
 # Lens Solver
+![Icon](app/src/main/ic_launcher-playstore.png)
 
 ## Overview
 
