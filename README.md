@@ -5,6 +5,8 @@
 
 Lens Solver utilizes the Gemini API vision to analyze images, specifically targeting math and physics problems. The app provides step-by-step solutions in Bahasa Indonesia.
 
+[Demo Video](https://drive.google.com/file/d/1aSxDfkTBFr4m3jmGdqKGOGbY0l-VXllQ/view?usp=drive_link)
+
 ## Getting Started
 
 ### Prerequisites
