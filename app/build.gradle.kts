@@ -24,22 +24,9 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release"){
-            val properties = Properties().apply {
-                load(File("key.properties").reader())
-            }
-            storePassword = properties.getProperty("storePassword")
-            keyPassword = properties.getProperty("keyPassword")
-            keyAlias = properties.getProperty("keyAlias")
-            storeFile = File(properties.getProperty("storeFile"))
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
